@@ -1,0 +1,7 @@
+.env
+cache/
+runs/
+__pycache__/
+.venv/
+.superpowers/
+*.pyc
