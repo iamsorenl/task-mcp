@@ -89,21 +89,19 @@ class Extractor:
         safe_id = re.sub(r"[^A-Za-z0-9_.-]", "_", str(item_id))[:100]  # ids come from API responses
         path = self.dir / name / f"{safe_id}-{digest}.json"
         if path.exists():
-            self.last = "cached"
-            return json.loads(path.read_text())
+            out = json.loads(path.read_text())
+            self.last = "failed" if out.get("extract_failed") else "cached"
+            return out
         error = None
         for _ in range(2):
             reply = self.complete(_prompt(ex, text, error))
             try:
-                raw = first_json(reply)
+                out, self.last = _clean(ex, first_json(reply), text), "extracted"
                 break
             except ValueError as e:
                 error = f"{e}; reply started: {reply[:80]!r}"
         else:
-            self.last = "failed"
-            return {"extract_failed": True}
-        out = _clean(ex, raw, text)
-        path.parent.mkdir(parents=True, exist_ok=True)
+            out, self.last = {"extract_failed": True}, "failed"
+        path.parent.mkdir(parents=True, exist_ok=True)  # failures too, so a bad posting isn't retried on every call
         path.write_text(json.dumps(out))
-        self.last = "extracted"
         return out

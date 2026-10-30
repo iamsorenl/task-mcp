@@ -70,3 +70,9 @@ def test_github_plan_runs_with_no_core_changes(tmp_path):  # generality check
 def test_core_has_no_api_names():
     src = "".join(p.read_text() for p in Path("src/task_mcp").glob("*.py")).lower()
     assert not any(w in src for w in ("greenhouse", "github", "job", "lever", "ashby"))
+
+
+@pytest.mark.parametrize("fields", [123, [1]])
+def test_non_string_fields_dont_crash(rb, fields):
+    r = call_tool(PLAN, SRC, "get_job", {"board": "acme", "id": JOB_ID, "fields": fields}, rb)
+    assert "error" not in r

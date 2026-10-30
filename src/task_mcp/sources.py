@@ -4,6 +4,7 @@ import itertools
 import json
 import re
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 import yaml
@@ -30,7 +31,7 @@ def endpoint_url(sources, endpoint_id, args):
     """-> (url, params). Path placeholders come from args; other args plus the endpoint query become params."""
     e = endpoint(sources, endpoint_id)
     names = placeholders(e["path"])
-    path = e["path"].format(**{n: str(args[n]) for n in names})
+    path = e["path"].format(**{n: quote(str(args[n]), safe="") for n in names})  # args may come from the agent
     params = {k: str(v) for k, v in (e.get("query") or {}).items()}
     params.update({k: str(v) for k, v in args.items() if k not in names})
     return sources["base"].rstrip("/") + path, params

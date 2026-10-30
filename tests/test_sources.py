@@ -37,3 +37,8 @@ def test_replay_normalizes_int_and_str_ids(tmp_path):  # Review Focus 4
 def test_replay_missing_is_404(tmp_path):
     record(SRC, gh_backend(), tmp_path)
     assert ReplayBackend(tmp_path).get("https://x/y", {})[0] == 404
+
+
+def test_path_placeholders_are_url_encoded():  # agent args can come from injected text
+    url, _ = endpoint_url(SRC, "list_jobs", {"board": "../../x?y=1"})
+    assert url == f"{BASE}/boards/..%2F..%2Fx%3Fy%3D1/jobs"

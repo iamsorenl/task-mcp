@@ -1,14 +1,20 @@
 """plan.yaml: load, validate, estimate token savings, and the readable summary `review` prints."""
+import builtins
+import keyword
 from pathlib import Path
 
 import yaml
 
 from .fields import apply_fields, est_tokens, field_paths, get_path
-from .sources import ReplayBackend, endpoint
+from .sources import ReplayBackend, endpoint, placeholders
 
 RULES = ("keep",)
 TYPES = ("string", "list")
 EXTRACT_EST = 300  # est tokens an extract adds to a response
+# Globals of the generated server.py (build.HEADER); a tool with one of these names would shadow it.
+SERVER_GLOBALS = {"json", "os", "Path", "Annotated", "MCPServer", "ToolAnnotations", "Field", "Extractor", "load_plan",
+                  "ollama_complete", "call_tool", "LiveBackend", "load_sources", "HERE", "PLAN", "SRC", "EXTRACTOR",
+                  "BACKEND", "LOG", "READ_ONLY", "FIELDS_DOC", "server", "_call"}
 
 
 def load_plan(path):
@@ -33,16 +39,54 @@ def _recorded_paths(sources, rec_dir, endpoint_id):
     return paths
 
 
+def _is_map_of_maps(x):
+    return isinstance(x, dict) and all(isinstance(v, dict) for v in x.values())
+
+
+def _shape_errors(plan):
+    """Model-written YAML can parse yet have the wrong shape; catch that before anything calls .get() on it."""
+    tools, extracts = plan.get("tools") or [], plan.get("extracts") or {}
+    if not isinstance(tools, list) or not all(isinstance(t, dict) for t in tools):
+        return ["tools must be a list of mappings"]
+    errs = [] if _is_map_of_maps(extracts) else ["extracts must map each name to a mapping"]
+    if not errs:
+        errs += [f"extract {n}: schema must map each field to a mapping like {{type: string}}"
+                 for n, ex in extracts.items() if not _is_map_of_maps(ex.get("schema") or {})]
+    for t in tools:
+        if not _is_map_of_maps(t.get("params") or {}):
+            errs.append(f"tool {t.get('name')}: params must map each name to a mapping like {{type: string}}")
+        if not isinstance(t.get("fields") or {}, dict):
+            errs.append(f"tool {t.get('name')}: fields must map each path to keep or {{extract: name}}")
+    return errs
+
+
+def _bad_name(n, tool=False):
+    """Names end up in file paths and generated Python."""
+    n = str(n)
+    if not n.isidentifier() or keyword.iskeyword(n):
+        return "must be a plain identifier and not a Python keyword"
+    if tool and (n in SERVER_GLOBALS or hasattr(builtins, n)):
+        return "is reserved by the generated server"
+    if not tool and n == "fields":
+        return "is reserved for the fallback param"
+
+
 def validate(plan, sources, rec_dir=None):
     """-> list of error strings; empty means the plan can be built."""
-    errs, known = [], {e["id"] for e in sources["endpoints"]}
+    errs = _shape_errors(plan)
+    if errs:
+        return errs
+    known = {e["id"] for e in sources["endpoints"]}
     extracts = plan.get("extracts") or {}
-    # names end up in file paths and generated Python, so they must be plain identifiers
-    for kind, names in (("extract", extracts), ("tool", [t.get("name") for t in plan.get("tools") or []])):
-        errs += [f"{kind} name {n!r} must be a plain identifier" for n in names if not str(n).isidentifier()]
+    for n in extracts:
+        if why := _bad_name(n):
+            errs.append(f"extract name {n!r} {why}")
     for t in plan.get("tools") or []:
-        errs += [f"tool {t.get('name')}: param name {n!r} must be a plain identifier"
-                 for n in (t.get("params") or {}) if not str(n).isidentifier()]
+        if why := _bad_name(t.get("name"), tool=True):
+            errs.append(f"tool name {t.get('name')!r} {why}")
+        for n in t.get("params") or {}:
+            if why := _bad_name(n):
+                errs.append(f"tool {t.get('name')}: param name {n!r} {why}")
     for name, ex in extracts.items():
         for field, spec in (ex.get("schema") or {}).items():
             if spec.get("type") not in TYPES:
@@ -52,6 +96,10 @@ def validate(plan, sources, rec_dir=None):
         if t.get("endpoint") not in known:
             errs.append(f"{where}: unknown endpoint {t.get('endpoint')!r}")
             continue
+        params = t.get("params") or {}
+        errs += [f"{where}: path placeholder {n!r} must be a required param"
+                 for n in placeholders(endpoint(sources, t["endpoint"])["path"])
+                 if not params.get(n, {}).get("required")]
         for path, rule in (t.get("fields") or {}).items():
             if rule in RULES:
                 continue

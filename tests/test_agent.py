@@ -105,3 +105,12 @@ def test_step_limit():
     out = run_task(fake_chat([call("get_job", {"id": str(i)}) for i in range(3)]), PLAN, TASK,
                    respond=lambda n, a: "{}", max_steps=3)
     assert out["stopped"] == "step_limit"
+
+
+def test_tool_exception_goes_back_to_agent():  # the live MCP server returns errors to the agent too
+    def boom(n, a):
+        raise KeyError("board")
+    chat = fake_chat([call("get_job", {"id": "1"}), final("done")])
+    out = run_task(chat, PLAN, TASK, respond=boom)
+    assert out["stopped"] is None and out["final"] == "done"
+    assert "KeyError" in next(m for m in chat.seen[1] if m["role"] == "tool")["content"]

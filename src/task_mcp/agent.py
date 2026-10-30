@@ -51,7 +51,10 @@ def run_task(chat, plan, task, respond, preferences="", max_steps=10, max_tool_c
                     text = REPEAT
                 else:
                     seen.add(key)
-                    text = respond(c["name"], c["args"])
+                    try:  # like the MCP server: a failing tool is an error result, not the end of the task
+                        text = respond(c["name"], c["args"])
+                    except Exception as e:
+                        text = json.dumps({"error": f"{type(e).__name__}: {e}"})
                 truncated = len(text) > max_tool_chars
                 if truncated:
                     text = text[:max_tool_chars]

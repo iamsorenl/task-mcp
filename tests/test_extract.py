@@ -107,3 +107,11 @@ def test_hostile_item_id_stays_inside_cache_dir(tmp_path):
     Extractor(PLAN, fake([], GOOD), cache).extract("description_facts", "../../escaped", HTML)
     assert not list(tmp_path.glob("escaped*")) and not list((tmp_path / "cache").parent.parent.glob("escaped*"))
     assert len(list(cache.rglob("*.json"))) == 1
+
+
+def test_failure_is_cached(tmp_path):  # otherwise every call to a bad posting costs two model calls
+    calls = []
+    ex = Extractor(PLAN, fake(calls, "not json"), tmp_path)
+    ex.extract("description_facts", "1", HTML)
+    out = ex.extract("description_facts", "1", HTML)
+    assert len(calls) == 2 and out == {"extract_failed": True} and ex.last == "failed"

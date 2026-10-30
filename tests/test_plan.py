@@ -66,3 +66,31 @@ def test_validate_rejects_unsafe_names():  # names reach file paths and generate
     p["tools"][0]["name"] = "bad name"
     errs = validate(p, SRC)
     assert any("../evil" in e and "name" in e for e in errs) and any("bad name" in e for e in errs)
+
+
+@pytest.mark.parametrize("change", [  # Review Focus 3: model YAML that parses but has the wrong shape
+    lambda p: p.update(tools=["search_jobs"]),
+    lambda p: p.update(tools={"a": 1}),
+    lambda p: p.update(extracts=["a"]),
+    lambda p: p["tools"][1].update(params={"board": "string"}),
+    lambda p: p["tools"][1].update(fields=["id", "title"]),
+    lambda p: p["extracts"]["description_facts"].update(schema={"f": "string"}),
+])
+def test_validate_reports_wrong_shapes_instead_of_crashing(change):
+    p = copy.deepcopy(PLAN)
+    change(p)
+    assert validate(p, SRC)
+
+
+@pytest.mark.parametrize("tool,param", [("get_job", "fields"), ("get_job", "class"), ("json", "id"), ("_call", "id")])
+def test_validate_rejects_keywords_and_reserved_names(tool, param):  # these build a server that can't import
+    p = copy.deepcopy(PLAN)
+    p["tools"][1]["name"] = tool
+    p["tools"][1]["params"][param] = {"type": "string", "required": True}
+    assert any(repr(tool) in e or repr(param) in e for e in validate(p, SRC))
+
+
+def test_validate_requires_path_placeholders():
+    p = copy.deepcopy(PLAN)
+    p["tools"][1]["params"]["id"]["required"] = False
+    assert any("id" in e and "required" in e for e in validate(p, SRC))

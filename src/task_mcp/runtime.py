@@ -30,7 +30,7 @@ def call_tool(plan, sources, name, args, backend, extractor=None, log_path=None)
         return {"error": f"unknown tool: {name}"}
     args = {k: v for k, v in (args or {}).items() if v is not None}
     want = args.pop("fields", None) or []
-    want = [want] if isinstance(want, str) else list(want)
+    want = [str(x) for x in (want if isinstance(want, list) else [want])]
     params = t.get("params") or {}
     missing = [k for k, p in params.items() if p.get("required") and k not in args]
     if missing:
