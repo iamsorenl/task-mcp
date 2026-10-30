@@ -73,7 +73,7 @@ def test_propose_raises_after_two_bad(rec_dir):
 def test_claude_code_complete_parses_result(monkeypatch):
     seen = {}
 
-    def run(cmd, input, capture_output, text):
+    def run(cmd, input, capture_output, text, cwd=None):
         seen["cmd"] = cmd
         return SimpleNamespace(returncode=0, stdout=json.dumps({"result": "x"}), stderr="")
     monkeypatch.setattr(subprocess, "run", run)
@@ -98,3 +98,17 @@ def test_live_propose_greenhouse_valid(rec_dir):
     from task_mcp.providers import ollama_complete
     plan = propose(SRC, rec_dir, "Screen job postings for fit against my preferences.", ollama_complete("gpt-oss:20b"))
     assert validate(plan, SRC, rec_dir) == []
+
+
+def test_claude_code_runs_without_tools_or_mcp_in_empty_dir(monkeypatch):  # samples are untrusted API text
+    seen = {}
+
+    def run(cmd, input, capture_output, text, cwd):
+        seen.update(cmd=cmd, cwd=cwd)
+        return SimpleNamespace(returncode=0, stdout=json.dumps({"result": "x"}), stderr="")
+    monkeypatch.setattr(subprocess, "run", run)
+    claude_code_complete()("hi")
+    i = seen["cmd"].index("--tools")
+    assert seen["cmd"][i + 1] == "" and "--strict-mcp-config" in seen["cmd"]
+    from pathlib import Path
+    assert seen["cwd"] != str(Path.cwd()) and not list(Path(seen["cwd"]).iterdir()) if Path(seen["cwd"]).exists() else True

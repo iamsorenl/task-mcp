@@ -1,6 +1,7 @@
 """Model providers. Ollama is the default; claude-code runs on the user's own Claude Code login."""
 import json
 import subprocess
+import tempfile
 
 import ollama
 
@@ -18,8 +19,11 @@ def ollama_complete(model, num_ctx=32768, json_mode=False, client=None):
 def claude_code_complete(model=None):
     """Shells out to `claude -p`. Uses whatever login Claude Code has; never asks for one itself."""
     def complete(prompt):
-        cmd = ["claude", "-p", "--output-format", "json", *(["--model", model] if model else [])]
-        r = subprocess.run(cmd, input=prompt, capture_output=True, text=True)
+        # The prompt carries untrusted API text, so Claude gets no tools, no MCP servers, and an empty folder.
+        cmd = ["claude", "-p", "--output-format", "json", "--tools", "", "--strict-mcp-config",
+               *(["--model", model] if model else [])]
+        with tempfile.TemporaryDirectory() as empty:
+            r = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=empty)
         if r.returncode != 0:
             raise RuntimeError(f"claude -p failed: {(r.stderr or r.stdout).strip()[:500]}")
         return json.loads(r.stdout)["result"]

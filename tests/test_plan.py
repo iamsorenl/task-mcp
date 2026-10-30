@@ -57,3 +57,12 @@ def test_estimate_after_smaller(rec_dir):
 def test_summary_lists_dropped_with_reason(rec_dir):
     s = summary(PLAN, SRC, rec_dir)
     assert "dropped" in s and "Legal boilerplate" in s and "extract" in s
+
+
+def test_validate_rejects_unsafe_names():  # names reach file paths and generated code
+    p = copy.deepcopy(PLAN)
+    p["extracts"]["../evil"] = p["extracts"].pop("description_facts")
+    p["tools"][1]["fields"]["content"] = {"extract": "../evil"}
+    p["tools"][0]["name"] = "bad name"
+    errs = validate(p, SRC)
+    assert any("../evil" in e and "name" in e for e in errs) and any("bad name" in e for e in errs)

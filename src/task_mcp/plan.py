@@ -37,6 +37,12 @@ def validate(plan, sources, rec_dir=None):
     """-> list of error strings; empty means the plan can be built."""
     errs, known = [], {e["id"] for e in sources["endpoints"]}
     extracts = plan.get("extracts") or {}
+    # names end up in file paths and generated Python, so they must be plain identifiers
+    for kind, names in (("extract", extracts), ("tool", [t.get("name") for t in plan.get("tools") or []])):
+        errs += [f"{kind} name {n!r} must be a plain identifier" for n in names if not str(n).isidentifier()]
+    for t in plan.get("tools") or []:
+        errs += [f"tool {t.get('name')}: param name {n!r} must be a plain identifier"
+                 for n in (t.get("params") or {}) if not str(n).isidentifier()]
     for name, ex in extracts.items():
         for field, spec in (ex.get("schema") or {}).items():
             if spec.get("type") not in TYPES:
