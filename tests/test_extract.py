@@ -100,3 +100,10 @@ def test_precompute_counts(tmp_path):
     assert stats["items"] == 2 and stats["items"] == stats["cached"] + stats["extracted"] + stats["failed"]
     again = precompute(PLAN, src, ReplayBackend(tmp_path / "rec"), Extractor(PLAN, fake([], GOOD), tmp_path / "c"))
     assert again["cached"] == 2
+
+
+def test_hostile_item_id_stays_inside_cache_dir(tmp_path):
+    cache = tmp_path / "cache"
+    Extractor(PLAN, fake([], GOOD), cache).extract("description_facts", "../../escaped", HTML)
+    assert not list(tmp_path.glob("escaped*")) and not list((tmp_path / "cache").parent.parent.glob("escaped*"))
+    assert len(list(cache.rglob("*.json"))) == 1

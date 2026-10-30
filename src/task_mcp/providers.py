@@ -1,0 +1,40 @@
+"""Model providers. Ollama is the default; claude-code runs on the user's own Claude Code login."""
+import json
+import subprocess
+
+import ollama
+
+
+def ollama_complete(model, num_ctx=32768, json_mode=False, client=None):
+    client = client or ollama.Client(timeout=600)
+
+    def complete(prompt):
+        r = client.chat(model=model, messages=[{"role": "user", "content": prompt}],
+                        options={"temperature": 0, "num_ctx": num_ctx}, **({"format": "json"} if json_mode else {}))
+        return r.message.content or ""
+    return complete
+
+
+def claude_code_complete(model=None):
+    """Shells out to `claude -p`. Uses whatever login Claude Code has; never asks for one itself."""
+    def complete(prompt):
+        cmd = ["claude", "-p", "--output-format", "json", *(["--model", model] if model else [])]
+        r = subprocess.run(cmd, input=prompt, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(f"claude -p failed: {(r.stderr or r.stdout).strip()[:500]}")
+        return json.loads(r.stdout)["result"]
+    return complete
+
+
+def ollama_chat(model, num_ctx=32768, client=None):
+    """-> chat(messages, tools) returning content, tool_calls, and token usage from Ollama."""
+    client = client or ollama.Client(timeout=600)
+
+    def chat(messages, tools):
+        r = client.chat(model=model, messages=messages, tools=tools, options={"temperature": 0, "num_ctx": num_ctx})
+        m = r.message
+        return {"content": m.content or "",
+                "tool_calls": [{"name": c.function.name, "args": dict(c.function.arguments or {})}
+                               for c in m.tool_calls or []],
+                "usage": {"in": r.prompt_eval_count or 0, "out": r.eval_count or 0}}
+    return chat

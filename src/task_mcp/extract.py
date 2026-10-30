@@ -86,7 +86,8 @@ class Extractor:
             self.last = "empty"
             return _clean(ex, {}, "")
         digest = hashlib.sha1(text.encode()).hexdigest()[:12]
-        path = self.dir / name / f"{item_id}-{digest}.json"
+        safe_id = re.sub(r"[^A-Za-z0-9_.-]", "_", str(item_id))[:100]  # ids come from API responses
+        path = self.dir / name / f"{safe_id}-{digest}.json"
         if path.exists():
             self.last = "cached"
             return json.loads(path.read_text())
