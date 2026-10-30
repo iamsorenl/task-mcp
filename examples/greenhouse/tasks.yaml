@@ -21,7 +21,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: SF hybrid 25%, $300-320k, no years asked
-  checked: false
+  checked: true
 - id: anthropic-5283063008
   q: 'Look at job 5283063008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -31,7 +31,7 @@ tasks:
     red_flags:
     - seniority
   why: asks for prior tech-lead experience, leads multi-month projects
-  checked: false
+  checked: true
 - id: figma-6158162004
   q: 'Look at job 6158162004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -41,7 +41,7 @@ tasks:
     red_flags:
     - seniority
   why: '''senior/staff-level engineering role'', 5+ years'
-  checked: false
+  checked: true
 - id: figma-5691911004
   q: 'Look at job 5691911004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -50,7 +50,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: varying seniority, SF hub, no years asked
-  checked: false
+  checked: true
 - id: vercel-6199608004
   q: 'Look at job 6199608004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -59,7 +59,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: 3+ years, hybrid SF
-  checked: false
+  checked: true
 - id: vercel-6105394004
   q: 'Look at job 6105394004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -68,7 +68,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: 2+ years, SF anchor days, normal on-call rotation
-  checked: false
+  checked: true
 - id: vercel-6137958004
   q: 'Look at job 6137958004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -77,7 +77,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: hybrid SF, no years asked
-  checked: false
+  checked: true
 - id: anthropic-5454673008
   q: 'Look at job 5454673008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -86,7 +86,7 @@ tasks:
     fit: 'yes'
     red_flags: []
   why: SF, 4+ years (at your limit)
-  checked: false
+  checked: true
 - id: vercel-5752684004
   q: 'Look at job 5752684004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -97,7 +97,7 @@ tasks:
     - seniority
     - experience_inflation
   why: title says FDE but body says Senior, 6+ years
-  checked: false
+  checked: true
 - id: anthropic-5134895008
   q: 'Look at job 5134895008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -107,7 +107,7 @@ tasks:
     red_flags:
     - seniority
   why: Senior Staff, 12+ years
-  checked: false
+  checked: true
 - id: anthropic-5174743008
   q: 'Look at job 5174743008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -117,7 +117,7 @@ tasks:
     red_flags:
     - seniority
   why: Senior title, 6+ years
-  checked: false
+  checked: true
 - id: anthropic-5449229008
   q: 'Look at job 5449229008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -127,7 +127,7 @@ tasks:
     red_flags:
     - seniority
   why: Staff FDE
-  checked: false
+  checked: true
 - id: vercel-6188400004
   q: 'Look at job 6188400004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -138,7 +138,7 @@ tasks:
     - seniority
     - location
   why: Staff level, remote-US only, 8+ years
-  checked: false
+  checked: true
 - id: anthropic-5423029008
   q: 'Look at job 5423029008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -148,7 +148,7 @@ tasks:
     red_flags:
     - location
   why: London only
-  checked: false
+  checked: true
 - id: figma-5551697004
   q: 'Look at job 5551697004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -158,7 +158,7 @@ tasks:
     red_flags:
     - location
   why: London only
-  checked: false
+  checked: true
 - id: vercel-5778418004
   q: 'Look at job 5778418004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
     [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
@@ -169,7 +169,7 @@ tasks:
     - seniority
     - location
   why: Senior FDE, London/Berlin
-  checked: false
+  checked: true
 - id: anthropic-5099753008
   q: 'Look at job 5099753008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -180,7 +180,7 @@ tasks:
     - seniority
     - location
   why: manager, NYC only, 10+ years
-  checked: false
+  checked: true
 - id: anthropic-4938432008
   q: 'Look at job 4938432008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -190,7 +190,7 @@ tasks:
     red_flags:
     - hours_996
   why: '''extended hours ... evenings and weekends'' during launches'
-  checked: false
+  checked: true
 - id: anthropic-5098025008
   q: 'Look at job 5098025008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -201,7 +201,7 @@ tasks:
     - seniority
     - hours_996
   why: Staff SWE; high-intensity
-  checked: false
+  checked: true
 - id: anthropic-4613592008
   q: 'Look at job 4613592008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
     "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
@@ -211,4 +211,4 @@ tasks:
     red_flags:
     - hours_996
   why: incidents on short notice incl. weekends
-  checked: false
+  checked: true
