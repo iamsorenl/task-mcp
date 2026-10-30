@@ -1,0 +1,14 @@
+name: greenhouse
+base: https://boards-api.greenhouse.io/v1
+endpoints:
+  - id: list_jobs
+    path: /boards/{board}/jobs
+    query: {content: "true"}
+    items: jobs[*]
+    item_id: id
+  - id: get_job
+    path: /boards/{board}/jobs/{id}
+    item_id: id
+    detail_of: list_jobs
+seeds: {board: [anthropic, figma, vercel]}
+max_details: 10
