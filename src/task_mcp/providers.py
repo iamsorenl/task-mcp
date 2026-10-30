@@ -6,12 +6,14 @@ import tempfile
 import ollama
 
 
-def ollama_complete(model, num_ctx=32768, json_mode=False, client=None):
+def ollama_complete(model, num_ctx=32768, json_mode=False, think=None, max_out=None, client=None):
+    """think=False stops thinking models (e.g. gemma4) spending the whole output budget before answering."""
     client = client or ollama.Client(timeout=600)
+    options = {"temperature": 0, "num_ctx": num_ctx, **({"num_predict": max_out} if max_out else {})}
+    extra = {**({"format": "json"} if json_mode else {}), **({"think": think} if think is not None else {})}
 
     def complete(prompt):
-        r = client.chat(model=model, messages=[{"role": "user", "content": prompt}],
-                        options={"temperature": 0, "num_ctx": num_ctx}, **({"format": "json"} if json_mode else {}))
+        r = client.chat(model=model, messages=[{"role": "user", "content": prompt}], options=options, **extra)
         return r.message.content or ""
     return complete
 

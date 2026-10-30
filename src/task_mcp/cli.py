@@ -26,7 +26,9 @@ CHAT_FACTORY = ollama_chat
 def COMPLETE_FACTORY(provider, model, json_mode=False):
     if provider == "claude-code":
         return claude_code_complete(model)
-    return ollama_complete(model or AGENT_MODEL, json_mode=json_mode)
+    if json_mode:  # extraction: short structured answers, no thinking
+        return ollama_complete(model or EXTRACT_MODEL, num_ctx=16384, json_mode=True, think=False, max_out=1500)
+    return ollama_complete(model or AGENT_MODEL)
 
 
 def _paths(d):

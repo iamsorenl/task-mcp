@@ -112,3 +112,22 @@ def test_claude_code_runs_without_tools_or_mcp_in_empty_dir(monkeypatch):  # sam
     assert seen["cmd"][i + 1] == "" and "--strict-mcp-config" in seen["cmd"]
     from pathlib import Path
     assert seen["cwd"] != str(Path.cwd()) and not list(Path(seen["cwd"]).iterdir()) if Path(seen["cwd"]).exists() else True
+
+
+def test_ollama_complete_can_turn_thinking_off_and_cap_output():
+    from task_mcp.providers import ollama_complete
+    seen = {}
+
+    def chat(**kw):
+        seen.update(kw)
+        return SimpleNamespace(message=SimpleNamespace(content="{}"))
+    ollama_complete("m", json_mode=True, think=False, max_out=1500, client=SimpleNamespace(chat=chat))("p")
+    assert seen["think"] is False and seen["format"] == "json" and seen["options"]["num_predict"] == 1500
+
+
+def test_cli_extractor_turns_thinking_off(monkeypatch):
+    from task_mcp import cli
+    seen = {}
+    monkeypatch.setattr(cli, "ollama_complete", lambda model, **kw: seen.update(kw) or (lambda p: "{}"))
+    cli.COMPLETE_FACTORY("ollama", "gemma4:12b", json_mode=True)
+    assert seen.get("think") is False and seen.get("max_out")

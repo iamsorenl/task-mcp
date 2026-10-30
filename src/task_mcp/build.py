@@ -25,7 +25,8 @@ from task_mcp.sources import LiveBackend, load_sources
 HERE = Path(__file__).parent
 PLAN = load_plan(HERE / "plan.yaml")
 SRC = load_sources(PLAN["sources_path"])
-EXTRACTOR = Extractor(PLAN, ollama_complete(os.environ.get("TASK_MCP_EXTRACT_MODEL", "gemma4:12b"), json_mode=True),
+EXTRACTOR = Extractor(PLAN, ollama_complete(os.environ.get("TASK_MCP_EXTRACT_MODEL", "gemma4:12b"), num_ctx=16384,
+                                       json_mode=True, think=False, max_out=1500),
                       HERE / "cache")
 BACKEND = LiveBackend()
 LOG = HERE / "fallback.jsonl"

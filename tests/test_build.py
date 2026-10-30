@@ -51,3 +51,8 @@ def test_built_server_calls_runtime(tmp_path, monkeypatch):
     monkeypatch.setattr(mod, "EXTRACTOR", None)  # no model in unit tests
     out = json.loads(mod.list_issues(owner="facebook", repo="react"))
     assert out["count"] == 5
+
+
+def test_built_server_extractor_turns_thinking_off(tmp_path):
+    src = build("examples/greenhouse/plan.yaml", tmp_path).read_text()
+    assert "think=False" in src and "max_out=" in src
