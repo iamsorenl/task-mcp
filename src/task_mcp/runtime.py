@@ -1,6 +1,7 @@
 """call_tool: what a generated server does for one tool call. Shared by the live server and the eval."""
 import datetime
 import json
+import time
 
 from .fields import apply_fields, get_path, html_to_text
 from .plan import _items
@@ -67,3 +68,27 @@ def call_tool(plan, sources, name, args, backend, extractor=None, log_path=None)
     if ep.get("items"):
         return {"items": out, "count": len(out)}
     return out[0] if out else {"error": "empty response"}
+
+
+def precompute(plan, sources, backend, extractor):
+    """Extract every recorded item once so later calls are served from the cache."""
+    stats = {"items": 0, "cached": 0, "extracted": 0, "failed": 0, "empty": 0, "unverified": 0, "seconds": 0.0}
+    start, done = time.monotonic(), set()
+    for t in plan["tools"]:
+        paths = {p: r["extract"] for p, r in (t.get("fields") or {}).items() if isinstance(r, dict)}
+        if not paths:
+            continue
+        ep = endpoint(sources, t["endpoint"])
+        for body in backend.bodies(t["endpoint"]):
+            for item in _items(body, ep):
+                item_id = str(item.get(ep.get("item_id", "id")))
+                for path, ex_name in paths.items():
+                    if (ex_name, item_id) in done:
+                        continue
+                    done.add((ex_name, item_id))
+                    out = extractor.extract(ex_name, item_id, get_path(item, path))
+                    stats["items"] += 1
+                    stats[extractor.last] += 1
+                    stats["unverified"] += len(out.get("unverified") or [])
+    stats["seconds"] = round(time.monotonic() - start, 1)
+    return stats
