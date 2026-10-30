@@ -90,7 +90,7 @@ class _Text(HTMLParser):
 
 
 def html_to_text(s):
-    """HTML (possibly entity-escaped twice, as Greenhouse sends it) to plain text with line breaks."""
+    """HTML (possibly entity-escaped twice, as some APIs send it) to plain text with line breaks."""
     s = html.unescape(s or "")
     if "<" not in s:
         s = html.unescape(s)
