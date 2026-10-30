@@ -58,13 +58,15 @@ def call_tool(plan, sources, name, args, backend, extractor=None, log_path=None)
                 return extractor.extract(ex_name, item_id, value)
             return html_to_text(value) if extracts.get(ex_name, {}).get("html") else value
 
-        shaped = apply_fields(item, t.get("fields") or {}, extract_fn)
+        shaped = dict(item) if t.get("passthrough") else apply_fields(item, t.get("fields") or {}, extract_fn)
         if want:
             shaped["_fields"] = {p: get_path(item, p) for p in want}
             if log_path:
                 for p in want:
                     _log(log_path, name, p, item_id)
         out.append(shaped)
+    if t.get("passthrough") and not filters:
+        return body
     if ep.get("items"):
         return {"items": out, "count": len(out)}
     return out[0] if out else {"error": "empty response"}
