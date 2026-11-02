@@ -14,6 +14,7 @@ def ollama_complete(model, num_ctx=32768, json_mode=False, think=None, max_out=N
 
     def complete(prompt):
         r = client.chat(model=model, messages=[{"role": "user", "content": prompt}], options=options, **extra)
+        complete.usage = {"in": r.prompt_eval_count or 0, "out": r.eval_count or 0}
         return r.message.content or ""
     return complete
 

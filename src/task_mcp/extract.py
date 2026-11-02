@@ -78,14 +78,17 @@ class Extractor:
         self.complete = complete
         self.dir = Path(cache_dir)
         self.last = None  # "cached" | "extracted" | "failed" | "empty", for precompute stats
+        self.last_usage = None  # model tokens spent on the last extract, None if no model call
 
     def extract(self, name, item_id, value):
         ex = self.extracts[name]
         text = html_to_text(value) if ex.get("html") else str(value or "")
+        self.last_usage = None
         if not text.strip():
             self.last = "empty"
             return _clean(ex, {}, "")
-        digest = hashlib.sha1(text.encode()).hexdigest()[:12]
+        # config in the key, so a prompt or schema change never serves a stale extract
+        digest = hashlib.sha1((text + json.dumps(ex, sort_keys=True)).encode()).hexdigest()[:12]
         safe_id = re.sub(r"[^A-Za-z0-9_.-]", "_", str(item_id))[:100]  # ids come from API responses
         path = self.dir / name / f"{safe_id}-{digest}.json"
         if path.exists():
@@ -95,6 +98,8 @@ class Extractor:
         error = None
         for _ in range(2):
             reply = self.complete(_prompt(ex, text, error))
+            if (u := getattr(self.complete, "usage", None)) is not None:
+                self.last_usage = {k: (self.last_usage or {}).get(k, 0) + u[k] for k in ("in", "out")}
             try:
                 out, self.last = _clean(ex, first_json(reply), text), "extracted"
                 break

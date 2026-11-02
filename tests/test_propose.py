@@ -7,7 +7,7 @@ import yaml
 
 from task_mcp.plan import validate
 from task_mcp.propose import ProposeError, build_prompt, propose
-from task_mcp.providers import claude_code_complete, ollama_chat
+from task_mcp.providers import claude_code_complete, ollama_chat, ollama_complete
 from task_mcp.sources import record
 from tests.helpers import BASE, FakeBackend, gh_backend, gh_list, gh_sources
 
@@ -120,7 +120,7 @@ def test_ollama_complete_can_turn_thinking_off_and_cap_output():
 
     def chat(**kw):
         seen.update(kw)
-        return SimpleNamespace(message=SimpleNamespace(content="{}"))
+        return SimpleNamespace(message=SimpleNamespace(content="{}"), prompt_eval_count=None, eval_count=None)
     ollama_complete("m", json_mode=True, think=False, max_out=1500, client=SimpleNamespace(chat=chat))("p")
     assert seen["think"] is False and seen["format"] == "json" and seen["options"]["num_predict"] == 1500
 
@@ -154,3 +154,10 @@ def test_retry_errors_survive_prompt_cap(rec_dir, monkeypatch):
     monkeypatch.setattr(pm, "MAX_PROMPT", 2000)  # the inventory alone overflows it
     p = build_prompt(SRC, rec_dir, "t", errors=["MARKER problem"])
     assert len(p) <= 2000 and "MARKER problem" in p
+
+
+def test_ollama_complete_sets_usage():
+    client = SimpleNamespace(chat=lambda **kw: SimpleNamespace(message=SimpleNamespace(content="x"),
+                                                               prompt_eval_count=9, eval_count=3))
+    c = ollama_complete("m", client=client)
+    assert c("hi") == "x" and c.usage == {"in": 9, "out": 3}

@@ -74,7 +74,8 @@ def call_tool(plan, sources, name, args, backend, extractor=None, log_path=None)
 
 def precompute(plan, sources, backend, extractor):
     """Extract every recorded item once so later calls are served from the cache."""
-    stats = {"items": 0, "cached": 0, "extracted": 0, "failed": 0, "empty": 0, "unverified": 0, "seconds": 0.0}
+    stats = {"items": 0, "cached": 0, "extracted": 0, "failed": 0, "empty": 0, "unverified": 0, "seconds": 0.0,
+             "tokens_in": 0, "tokens_out": 0}
     start, done = time.monotonic(), set()
     for t in plan["tools"]:
         paths = {p: r["extract"] for p, r in (t.get("fields") or {}).items() if isinstance(r, dict)}
@@ -92,5 +93,8 @@ def precompute(plan, sources, backend, extractor):
                     stats["items"] += 1
                     stats[extractor.last] += 1
                     stats["unverified"] += len(out.get("unverified") or [])
+                    u = extractor.last_usage or {}
+                    stats["tokens_in"] += u.get("in", 0)
+                    stats["tokens_out"] += u.get("out", 0)
     stats["seconds"] = round(time.monotonic() - start, 1)
     return stats

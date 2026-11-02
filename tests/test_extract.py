@@ -1,3 +1,4 @@
+import copy
 import json
 
 import pytest
@@ -115,3 +116,34 @@ def test_failure_is_cached(tmp_path):  # otherwise every call to a bad posting c
     ex.extract("description_facts", "1", HTML)
     out = ex.extract("description_facts", "1", HTML)
     assert len(calls) == 2 and out == {"extract_failed": True} and ex.last == "failed"
+
+
+def test_cache_key_changes_with_config(tmp_path):  # a prompt/schema change must not reuse stale extracts
+    calls = []
+    Extractor(PLAN, fake(calls, GOOD), tmp_path).extract("description_facts", "1", HTML)
+    plan2 = copy.deepcopy(PLAN)
+    plan2["extracts"]["description_facts"]["instructions"] += " Be strict."
+    Extractor(plan2, fake(calls, GOOD), tmp_path).extract("description_facts", "1", HTML)
+    assert len(calls) == 2
+
+
+def test_old_cache_file_for_other_config_is_ignored(tmp_path):  # Review Focus 3
+    (tmp_path / "description_facts").mkdir()
+    (tmp_path / "description_facts" / "1-000000000000.json").write_text("{not json")
+    calls = []
+    Extractor(PLAN, fake(calls, GOOD), tmp_path).extract("description_facts", "1", HTML)
+    assert len(calls) == 1
+
+
+def test_extract_records_usage_and_precompute_sums_it(tmp_path):
+    complete = fake([], GOOD)
+    complete.usage = {"in": 100, "out": 20}
+    ex = Extractor(PLAN, complete, tmp_path / "cache")
+    ex.extract("description_facts", "1", HTML)
+    assert ex.last_usage == {"in": 100, "out": 20}
+    ex.extract("description_facts", "1", HTML)
+    assert ex.last_usage is None  # cache hit
+    record(gh_sources(), gh_backend(), tmp_path / "rec")
+    stats = precompute(PLAN, gh_sources(), ReplayBackend(tmp_path / "rec"), Extractor(PLAN, complete, tmp_path / "c2"))
+    assert stats["extracted"] > 0
+    assert stats["tokens_in"] == 100 * stats["extracted"] and stats["tokens_out"] == 20 * stats["extracted"]
