@@ -104,3 +104,18 @@ def test_report_mixed_models_needs_model_flag(api_dir, monkeypatch):
     assert cli.main(["report", str(api_dir)]) == 1
     assert cli.main(["report", str(api_dir), "--model", "m2"]) == 0
     assert "`m2`" in (api_dir / "REPORT.md").read_text()
+
+
+def test_eval_task_subset_keeps_other_rows(api_dir, monkeypatch):
+    monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
+    monkeypatch.setattr(cli, "COMPLETE_FACTORY", lambda provider, model, json_mode=False: (lambda p: GOOD))
+    assert cli.main(["eval", str(api_dir)]) == 0  # tasks a and b, three arms
+    assert cli.main(["eval", str(api_dir), "--tasks", "a", "--arms", "lean"]) == 0
+    rows = [json.loads(l) for l in (api_dir / "runs" / "results.jsonl").read_text().splitlines()]
+    assert sorted((r["arm"], r["task"]) for r in rows) == sorted((a, t) for a in ("raw", "shaped", "lean") for t in "ab")
+
+
+def test_eval_unknown_task_id_exits_1(api_dir, monkeypatch):
+    monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
+    assert cli.main(["eval", str(api_dir), "--tasks", "zzz"]) == 1
+    assert not (api_dir / "runs" / "results.jsonl").exists()

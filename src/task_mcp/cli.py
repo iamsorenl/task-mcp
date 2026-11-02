@@ -105,9 +105,10 @@ def cmd_precompute(a):
 
 
 def _save_rows(path, rows):
-    done = {(r["arm"], r["model"]) for r in rows}
+    key = lambda r: (r["arm"], r["model"], r["task"])
+    done = {key(r) for r in rows}
     keep = [json.loads(l) for l in path.read_text().splitlines()] if path.exists() else []
-    keep = [r for r in keep if (r["arm"], r["model"]) not in done]
+    keep = [r for r in keep if key(r) not in done]
     path.write_text("".join(json.dumps(r) + "\n" for r in keep + rows))
 
 
@@ -118,6 +119,12 @@ def cmd_eval(a):
         return 1
     tasks_doc, rb = yaml.safe_load((d / "tasks.yaml").read_text()), ReplayBackend(rec)
     tasks = [t for t in tasks_doc["tasks"] if t.get("checked") or not a.only_checked]
+    if a.tasks:
+        want = a.tasks.split(",")
+        if unknown := sorted(set(want) - {t["id"] for t in tasks}):
+            print(f"unknown or unchecked task ids: {unknown}", file=sys.stderr)
+            return 1
+        tasks = [t for t in tasks if t["id"] in want]
     chat, rows = CHAT_FACTORY(a.model), []
     for arm in a.arms.split(","):
         p = arm_plan(plan, src, arm)
@@ -187,6 +194,7 @@ def main(argv=None):
             s.add_argument("--arms", default=",".join(ARMS))
             s.add_argument("--model", default=AGENT_MODEL)
             s.add_argument("--only-checked", action="store_true")
+            s.add_argument("--tasks", default=None, help="comma-separated task ids; other rows are kept")
     s = sub.add_parser("report", help="write REPORT.md from eval results")
     s.add_argument("dir")
     s.add_argument("--model", default=None, help="agent model to report on, when results hold more than one")
