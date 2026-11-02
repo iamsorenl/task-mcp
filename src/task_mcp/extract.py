@@ -25,6 +25,16 @@ def first_json(text):
     return json.JSONDecoder().raw_decode(text[start:])[0]
 
 
+def hint_sentences(text, patterns, cap=8):
+    """Sentences of text matching any pattern (case-insensitive), in order, deduped, each <= 300 chars."""
+    out = []
+    for s in re.split(r"(?<=[.!?])\s+|\n+", text):
+        s = s.strip()[:300]
+        if s and s not in out and any(re.search(p, s, re.I) for p in patterns):
+            out.append(s)
+    return out[:cap]
+
+
 def _prompt(ex, text, error=None):
     fields = []
     for name, spec in ex["schema"].items():
@@ -40,6 +50,11 @@ def _prompt(ex, text, error=None):
         fields.append(f'- "{name}": {shape}. {spec.get("description", "")}'.rstrip())
     p = (f"{ex.get('instructions', '').strip()}\n\nReply with one JSON object with these keys:\n"
          + "\n".join(fields) + f"\n\nTEXT:\n{text}\n")
+    for name, spec in ex["schema"].items():
+        for kind, patterns in (spec.get("hints") or {}).items():
+            if found := hint_sentences(text, patterns):
+                p += (f'\nSentences that may be {kind} items for "{name}". Include each one that really is, '
+                      "quoting it exactly:\n" + "\n".join(f"- {s}" for s in found) + "\n")
     if error:
         p += f"\nYour last reply could not be used ({error}). Reply with only the JSON object.\n"
     return p

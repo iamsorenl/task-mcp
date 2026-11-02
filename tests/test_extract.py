@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from task_mcp.extract import Extractor, normalize
+from task_mcp.extract import Extractor, _prompt, hint_sentences, normalize
 from task_mcp.plan import load_plan
 from task_mcp.runtime import precompute
 from task_mcp.sources import ReplayBackend, record
@@ -147,3 +147,25 @@ def test_extract_records_usage_and_precompute_sums_it(tmp_path):
     stats = precompute(PLAN, gh_sources(), ReplayBackend(tmp_path / "rec"), Extractor(PLAN, complete, tmp_path / "c2"))
     assert stats["extracted"] > 0
     assert stats["tokens_in"] == 100 * stats["extracted"] and stats["tokens_out"] == 20 * stats["extracted"]
+
+
+def test_hint_sentences_match_cap_and_order():  # Review Focus 2: many matches stay capped
+    text = "We ship fast. Thrive in high-intensity environments. Weekends off. " + "Evenings. " * 20
+    s = hint_sentences(text, [r"intensity", r"weekends?", r"evenings?"])
+    assert s[0] == "Thrive in high-intensity environments." and s[1] == "Weekends off."
+    assert len(s) == 3  # duplicates of "Evenings." collapse to one
+
+
+def test_hint_sentences_cap_and_truncate():
+    text = " ".join(f"Evening shift {i} " + "x" * 400 + "." for i in range(20))
+    s = hint_sentences(text, [r"evening"])
+    assert len(s) == 8 and all(len(x) <= 300 for x in s)
+
+
+def test_prompt_lists_hinted_sentences_only_when_matched():
+    ex = copy.deepcopy(PLAN["extracts"]["description_facts"])
+    ex["schema"]["red_flags"]["hints"] = {"hours_996": [r"intensity"]}
+    p = _prompt(ex, "Thrive in high-intensity environments.")
+    assert 'Sentences that may be hours_996 items for "red_flags"' in p
+    assert "- Thrive in high-intensity environments." in p
+    assert "Sentences that may be" not in _prompt(ex, "Plain posting.")

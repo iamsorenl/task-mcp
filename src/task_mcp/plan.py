@@ -1,6 +1,7 @@
 """plan.yaml: load, validate, estimate token savings, and the readable summary `review` prints."""
 import builtins
 import keyword
+import re
 from pathlib import Path
 
 import yaml
@@ -71,6 +72,24 @@ def _bad_name(n, tool=False):
         return "is reserved for the fallback param"
 
 
+def _hint_errors(where, spec):
+    hints = spec.get("hints")
+    if hints is None:
+        return []
+    if not (spec.get("type") == "list" and spec.get("quote") and spec.get("enum")):
+        return [f"{where}: hints need a quote list with an enum"]
+    if not isinstance(hints, dict) or not all(isinstance(v, list) for v in hints.values()):
+        return [f"{where}: hints must map an enum value to a list of regexes"]
+    errs = [f"{where}: hint type {k!r} not in enum {spec['enum']}" for k in hints if k not in spec["enum"]]
+    for k, patterns in hints.items():
+        for pat in patterns:
+            try:
+                re.compile(pat)
+            except (re.error, TypeError) as e:
+                errs.append(f"{where}: bad regex {pat!r} for {k}: {e}")
+    return errs
+
+
 def validate(plan, sources, rec_dir=None):
     """-> list of error strings; empty means the plan can be built."""
     errs = _shape_errors(plan)
@@ -91,6 +110,7 @@ def validate(plan, sources, rec_dir=None):
         for field, spec in (ex.get("schema") or {}).items():
             if spec.get("type") not in TYPES:
                 errs.append(f"extract {name}.{field}: type {spec.get('type')!r} must be one of {TYPES}")
+            errs += _hint_errors(f"extract {name}.{field}", spec)
     for t in plan.get("tools") or []:
         where = f"tool {t.get('name')}"
         if t.get("endpoint") not in known:

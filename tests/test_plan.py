@@ -94,3 +94,21 @@ def test_validate_requires_path_placeholders():
     p = copy.deepcopy(PLAN)
     p["tools"][1]["params"]["id"]["required"] = False
     assert any("id" in e and "required" in e for e in validate(p, SRC))
+
+
+@pytest.mark.parametrize("field,hints,why", [
+    ("red_flags", {"hours_996": ["("]}, "bad regex"),
+    ("red_flags", {"nope": ["x"]}, "not in enum"),
+    ("experience", {"hours_996": ["x"]}, "enum"),
+])
+def test_validate_rejects_bad_hints(field, hints, why):  # Review Focus 1
+    p = copy.deepcopy(PLAN)
+    p["extracts"]["description_facts"]["schema"][field]["hints"] = hints
+    errs = validate(p, SRC)
+    assert any(f"description_facts.{field}" in e and why in e for e in errs), errs
+
+
+def test_validate_accepts_good_hints():
+    p = copy.deepcopy(PLAN)
+    p["extracts"]["description_facts"]["schema"]["red_flags"]["hints"] = {"hours_996": [r"intensity", r"weekends?"]}
+    assert validate(p, SRC) == []
