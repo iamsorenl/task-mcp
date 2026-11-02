@@ -2,7 +2,14 @@
 
 Point it at a bloated API, describe the task, and it generates a small MCP server that hands the model only what the task needs. Long text fields (like a job description) get turned into a few checked facts instead of being passed through whole.
 
-**First result, 20 Greenhouse job postings screened by a local `gpt-oss:20b`:** the lean server cut median input tokens from 3,950 to 1,560 (2.5x fewer) and tool output from 12.4k to 1.6k characters. It passed 17/20 tasks against 18/20 for the raw API. So it's cheaper, and slightly less accurate. Full numbers are in [`examples/greenhouse/REPORT.md`](examples/greenhouse/REPORT.md).
+**Results so far, screening Greenhouse job postings with a local `gpt-oss:20b`:**
+
+- **Savings hold.** On 30 held-out postings never used for tuning, the lean server cut median input tokens from 3,552 to 1,586 (2.2x fewer) on tasks both versions got right. Extracting a posting once costs about 2,000 tokens and 44 s; lean saves about 2,000 tokens and 12 s per question, so it pays back after 1 question by tokens, 3.6 by time.
+- **Reliability isn't there yet.** Lean passed 20/30 (95% CI 49–81%), the same as the raw API (20/30), but the two arms fail on different tasks. Lean got 2 tasks wrong that raw got right, against a target of at most 1. In both, the extractor pre-labeled a sentence as a red flag (an "experience will correlate with job level" boilerplate line, and a security-clearance requirement) and the agent took the label at face value. Lean also got 2 right that raw missed.
+- **Tuning set (20 postings, M1):** lean 17/20 vs raw 18/20, 2.5x fewer tokens.
+- **Not tested yet:** "fewer calls". Greenhouse needs one call per question, so task-shaped tools can't save calls here; that's M2b.
+
+Full numbers: [held-out report](examples/greenhouse-holdout/REPORT.md), [tuning-set report](examples/greenhouse/REPORT.md), [M1 report](examples/greenhouse/REPORT-m1.md).
 
 Inspired by Nexla's talk "How We Built Agents That Build Task-Specific MCP Servers" (Production Agent Lab, SF, 2026-10-22). Background research is in [`research/`](research/README.md).
 
