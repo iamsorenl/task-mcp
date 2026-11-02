@@ -78,6 +78,7 @@ def _save(out, idx, endpoint_id, url, params, status, body):
     (out / f"{key}.json").write_text(json.dumps(body))
     idx.append({"key": key, "endpoint": endpoint_id, "url": url, "params": params,
                 "file": f"{key}.json", "status": status})
+    (out / "index.json").write_text(json.dumps(idx, indent=1))  # every call, so a crash keeps what was recorded
 
 
 def record(sources, backend, out_dir):
@@ -101,5 +102,4 @@ def record(sources, backend, out_dir):
                     durl, dparams = endpoint_url(sources, d["id"], dargs)
                     dstatus, dbody = backend.get(durl, dparams)
                     _save(out, idx, d["id"], durl, dparams, dstatus, dbody)
-    (out / "index.json").write_text(json.dumps(idx, indent=1))
     return idx

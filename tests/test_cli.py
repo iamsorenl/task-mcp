@@ -17,7 +17,7 @@ def api_dir(tmp_path):
     shutil.copy("examples/greenhouse/plan.yaml", tmp_path / "plan.yaml")
     jid = gh_list()["jobs"][0]["id"]
     (tmp_path / "tasks.yaml").write_text(yaml.safe_dump({
-        "preferences": "No 996.", "red_flag_types": ["hours_996"],
+        "preferences": "No 996.",
         "tasks": [{"id": "a", "q": f"Is job {jid} on board acme a fit?", "expected": {"fit": "no", "red_flags": []},
                    "checked": True},
                   {"id": "b", "q": "unchecked", "expected": {"fit": "no", "red_flags": []}, "checked": False}]}))
@@ -78,3 +78,29 @@ def test_precompute_writes_stats(api_dir, monkeypatch):
 def test_build(api_dir, tmp_path):
     assert cli.main(["build", str(api_dir), "--out", str(tmp_path / "srv")]) == 0
     assert (tmp_path / "srv" / "server.py").exists()
+
+
+def test_review_before_record_checks_shape_only(api_dir, capsys):
+    shutil.rmtree(api_dir / "recordings")
+    assert cli.main(["review", str(api_dir)]) == 0
+    assert "task-mcp record" in capsys.readouterr().out
+
+
+def test_eval_and_precompute_refuse_invalid_plan(api_dir, monkeypatch):
+    monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
+    monkeypatch.setattr(cli, "COMPLETE_FACTORY", lambda provider, model, json_mode=False: (lambda p: GOOD))
+    p = yaml.safe_load((api_dir / "plan.yaml").read_text())
+    p["tools"][0]["endpoint"] = "nowhere"
+    (api_dir / "plan.yaml").write_text(yaml.safe_dump(p))
+    assert cli.main(["eval", str(api_dir)]) == 1 and cli.main(["precompute", str(api_dir)]) == 1
+    assert not (api_dir / "runs").exists()
+
+
+def test_report_mixed_models_needs_model_flag(api_dir, monkeypatch):
+    monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
+    monkeypatch.setattr(cli, "COMPLETE_FACTORY", lambda provider, model, json_mode=False: (lambda p: GOOD))
+    cli.main(["eval", str(api_dir), "--only-checked", "--model", "m1"])
+    cli.main(["eval", str(api_dir), "--only-checked", "--model", "m2"])
+    assert cli.main(["report", str(api_dir)]) == 1
+    assert cli.main(["report", str(api_dir), "--model", "m2"]) == 0
+    assert "`m2`" in (api_dir / "REPORT.md").read_text()

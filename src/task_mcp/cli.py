@@ -36,6 +36,16 @@ def _paths(d):
     return d, load_sources(d / "sources.yaml"), d / "recordings"
 
 
+def _valid_plan(d, src, rec):
+    """-> plan, or None after printing why it is invalid."""
+    plan = load_plan(d / "plan.yaml")
+    errs = validate(plan, src, rec if rec.exists() else None)
+    if errs:
+        print("\n".join(f"ERROR: {e}" for e in errs), file=sys.stderr)
+        return None
+    return plan
+
+
 def cmd_record(a):
     d, src, rec = _paths(a.dir)
     idx = record(src, LiveBackend(), rec)
@@ -59,8 +69,12 @@ def cmd_propose(a):
 def cmd_review(a):
     d, src, rec = _paths(a.dir)
     plan = load_plan(d / a.plan)
-    errs = validate(plan, src, rec)
-    print(summary(plan, src, rec) if not errs else "")
+    if not rec.exists():
+        errs = validate(plan, src)
+        print("no recordings yet, so only the plan's shape was checked. Run: task-mcp record " + str(d))
+    else:
+        errs = validate(plan, src, rec)
+        print(summary(plan, src, rec) if not errs else "")
     for e in errs:
         print(f"ERROR: {e}")
     return 1 if errs else 0
@@ -68,9 +82,7 @@ def cmd_review(a):
 
 def cmd_build(a):
     d, src, rec = _paths(a.dir)
-    errs = validate(load_plan(d / "plan.yaml"), src, rec if rec.exists() else None)
-    if errs:
-        print("\n".join(f"ERROR: {e}" for e in errs), file=sys.stderr)
+    if _valid_plan(d, src, rec) is None:
         return 1
     print(f"built {build_mod.build(d / 'plan.yaml', a.out)}")
     return 0
@@ -82,7 +94,9 @@ def _extractor(d, plan, a):
 
 def cmd_precompute(a):
     d, src, rec = _paths(a.dir)
-    plan = load_plan(d / "plan.yaml")
+    plan = _valid_plan(d, src, rec)
+    if plan is None:
+        return 1
     stats = precompute(plan, src, ReplayBackend(rec), _extractor(d, plan, a))
     (d / "runs").mkdir(exist_ok=True)
     (d / "runs" / "precompute.json").write_text(json.dumps(stats, indent=1))
@@ -99,7 +113,10 @@ def _save_rows(path, rows):
 
 def cmd_eval(a):
     d, src, rec = _paths(a.dir)
-    plan, tasks_doc, rb = load_plan(d / "plan.yaml"), yaml.safe_load((d / "tasks.yaml").read_text()), ReplayBackend(rec)
+    plan = _valid_plan(d, src, rec)
+    if plan is None:
+        return 1
+    tasks_doc, rb = yaml.safe_load((d / "tasks.yaml").read_text()), ReplayBackend(rec)
     tasks = [t for t in tasks_doc["tasks"] if t.get("checked") or not a.only_checked]
     chat, rows = CHAT_FACTORY(a.model), []
     for arm in a.arms.split(","):
@@ -126,7 +143,15 @@ def cmd_report(a):
     pre = d / "runs" / "precompute.json"
     stats = json.loads(pre.read_text()) if pre.exists() else {}
     models = sorted({r["model"] for r in rows})
-    meta = {"api": d.name, "model": ", ".join(models), "date": datetime.date.today().isoformat()}
+    if a.model:
+        rows = [r for r in rows if r["model"] == a.model]
+    elif len(models) > 1:
+        print(f"results.jsonl holds several agent models {models}; pick one with --model", file=sys.stderr)
+        return 1
+    if not rows:
+        print(f"no results for model {a.model}", file=sys.stderr)
+        return 1
+    meta = {"api": d.name, "model": a.model or models[0], "date": datetime.date.today().isoformat()}
     (d / "REPORT.md").write_text(render(rows, stats, meta))
     print(f"wrote {d / 'REPORT.md'}")
     return 0
@@ -164,6 +189,7 @@ def main(argv=None):
             s.add_argument("--only-checked", action="store_true")
     s = sub.add_parser("report", help="write REPORT.md from eval results")
     s.add_argument("dir")
+    s.add_argument("--model", default=None, help="agent model to report on, when results hold more than one")
     s.set_defaults(fn=cmd_report)
     a = ap.parse_args(argv)
     return a.fn(a)

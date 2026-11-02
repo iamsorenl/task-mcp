@@ -55,13 +55,13 @@ def build_prompt(sources, rec_dir, task, errors=None):
         parts.append("\n".join(lines))
         if items and len(samples) < MAX_SAMPLES:
             samples.append(f"SAMPLE ITEM from {ep['id']}:\n" + json.dumps(_short(items[0], 200)))
-    if errors:
-        parts.append("Your last plan had these problems. Fix them:\n" + "\n".join(f"- {e}" for e in errors))
     head = "\n\n".join(parts)
     for s in samples:
         if len(head) + len(s) + 2 <= MAX_PROMPT:
             head += "\n\n" + s
-    return head[:MAX_PROMPT]
+    fix = ("\n\nYour last plan had these problems. Fix them:\n" + "\n".join(f"- {e}" for e in errors))[:MAX_PROMPT // 4] \
+        if errors else ""
+    return head[:MAX_PROMPT - len(fix)] + fix
 
 
 class ProposeError(Exception):

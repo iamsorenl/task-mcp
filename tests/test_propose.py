@@ -131,3 +131,26 @@ def test_cli_extractor_turns_thinking_off(monkeypatch):
     monkeypatch.setattr(cli, "ollama_complete", lambda model, **kw: seen.update(kw) or (lambda p: "{}"))
     cli.COMPLETE_FACTORY("ollama", "gemma4:12b", json_mode=True)
     assert seen.get("think") is False and seen.get("max_out")
+
+
+def test_claude_code_is_error_with_exit_0_raises(monkeypatch):
+    out = json.dumps({"is_error": True, "result": "usage limit reached"})
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=0, stdout=out, stderr=""))
+    with pytest.raises(RuntimeError, match="usage limit"):
+        claude_code_complete()("hi")
+
+
+def test_claude_code_skips_user_settings(monkeypatch):  # no user hooks or plugins run on untrusted text
+    seen = {}
+    monkeypatch.setattr(subprocess, "run", lambda cmd, **k: seen.update(cmd=cmd) or
+                        SimpleNamespace(returncode=0, stdout=json.dumps({"result": "x"}), stderr=""))
+    claude_code_complete()("hi")
+    i = seen["cmd"].index("--setting-sources")
+    assert seen["cmd"][i + 1] == ""
+
+
+def test_retry_errors_survive_prompt_cap(rec_dir, monkeypatch):
+    import task_mcp.propose as pm
+    monkeypatch.setattr(pm, "MAX_PROMPT", 2000)  # the inventory alone overflows it
+    p = build_prompt(SRC, rec_dir, "t", errors=["MARKER problem"])
+    assert len(p) <= 2000 and "MARKER problem" in p

@@ -42,3 +42,20 @@ def test_replay_missing_is_404(tmp_path):
 def test_path_placeholders_are_url_encoded():  # agent args can come from injected text
     url, _ = endpoint_url(SRC, "list_jobs", {"board": "../../x?y=1"})
     assert url == f"{BASE}/boards/..%2F..%2Fx%3Fy%3D1/jobs"
+
+
+def test_record_keeps_index_when_a_call_crashes(tmp_path):
+    class Dies:
+        def __init__(self):
+            self.n, self.inner = 0, gh_backend()
+
+        def get(self, url, params):
+            self.n += 1
+            if self.n == 3:
+                raise ConnectionError("network down")
+            return self.inner.get(url, params)
+    try:
+        record(SRC, Dies(), tmp_path)
+    except ConnectionError:
+        pass
+    assert len(ReplayBackend(tmp_path).index) == 2

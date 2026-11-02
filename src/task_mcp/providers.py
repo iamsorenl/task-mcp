@@ -23,12 +23,16 @@ def claude_code_complete(model=None):
     def complete(prompt):
         # The prompt carries untrusted API text, so Claude gets no tools, no MCP servers, and an empty folder.
         cmd = ["claude", "-p", "--output-format", "json", "--tools", "", "--strict-mcp-config",
+               "--setting-sources", "",
                *(["--model", model] if model else [])]
         with tempfile.TemporaryDirectory() as empty:
             r = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=empty)
         if r.returncode != 0:
             raise RuntimeError(f"claude -p failed: {(r.stderr or r.stdout).strip()[:500]}")
-        return json.loads(r.stdout)["result"]
+        out = json.loads(r.stdout)
+        if out.get("is_error"):  # e.g. usage limit hit: exit 0, error text in result
+            raise RuntimeError(f"claude -p failed: {str(out.get('result'))[:500]}")
+        return out["result"]
     return complete
 
 
