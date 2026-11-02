@@ -52,6 +52,15 @@ extracts:
         type: list
         quote: true
         enum: [seniority, experience_inflation, hours_996, location, pay, other]
-        description: "Senior/Staff level, inflated requirements, 996 or long hours, location limits, missing or low pay, anything else off"
+        description: >-
+          seniority: the role itself is Senior, Staff, Principal, lead or manager level (a posting open at several
+          levels is not a flag). experience_inflation: more than 4 years asked, or unusual requirements; 4 years or
+          less, including "4+ years", is fine. hours_996: 996, weekends, evenings, extended or long hours, or a
+          high-intensity pace ("high-intensity", "intensity is the norm"); "fast-paced" alone and a normal on-call
+          rotation are not flags. Only flag what the text clearly states; generic boilerplate (e.g. "years
+          will correlate with job level") is not a flag. When unsure, leave it out. location: no Bay Area office option; a remote or hub option offered alongside is
+          not a limit. pay: no pay range or low pay. other: anything else off.
+        hints:
+          hours_996: ['\bintens(e|ity)\b', '\bweekends?\b', '\bevenings?\b', '\b(extended|long) (hours|days)\b', '\b996\b']
       pay_range: {type: string, description: "Pay range as written"}
-      onsite: {type: string, description: "Onsite/hybrid/remote terms including days per week"}
+      onsite: {type: string, description: "Every office, hybrid and remote option as written, with days per week, e.g. 'Hybrid in San Francisco 3 days a week'. Only work-arrangement statements, not perks or benefits lists; null if the text has none"}
