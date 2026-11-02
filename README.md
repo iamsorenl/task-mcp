@@ -9,7 +9,7 @@ Point it at a bloated API, describe the task, and it generates a small MCP serve
 - **Tuning set (20 postings, M1):** lean 17/20 vs raw 18/20, 2.5x fewer tokens.
 - **Not tested yet:** "fewer calls". Greenhouse needs one call per question, so task-shaped tools can't save calls here; that's M2b.
 
-Full numbers: [held-out report](examples/greenhouse-holdout/REPORT.md), [tuning-set report](examples/greenhouse/REPORT.md), [M1 report](examples/greenhouse/REPORT-m1.md).
+Full numbers: [held-out report](examples/greenhouse-holdout/REPORT.md) and [verdict](examples/greenhouse-holdout/VERDICT.md), [tuning-set report](examples/greenhouse/REPORT.md), [M1 report](examples/greenhouse/REPORT-m1.md).
 
 Inspired by Nexla's talk "How We Built Agents That Build Task-Specific MCP Servers" (Production Agent Lab, SF, 2026-10-22). Background research is in [`research/`](research/README.md).
 

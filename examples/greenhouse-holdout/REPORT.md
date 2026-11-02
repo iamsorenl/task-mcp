@@ -22,8 +22,6 @@ Lean failed 2 of the 20 tasks raw passed. These are the mistakes the trimming ca
 Both failed: anthropic-5057647008, anthropic-5437172008, anthropic-5462972008, scaleai-4513943005, scaleai-4665557005, scaleai-4720573005, vercel-6225825004, verkada-5275159007
 Lean only: anthropic-5450099008, xai-5111374007
 
-**Verdict: M2a target missed (2 caused mistakes, target 0–1).** Per the spec, M2a stops here and these are reported as they are. Both trace to the extract, not the agent: the cached `red_flags` already held the boilerplate line (5364804008) and the clearance line (4673771005), each typed `experience_inflation`, and lean's answer repeated them. The tuning set's remaining caused mistake (5238637008) is the same boilerplate pattern. Two notes: Soren ruled a clearance acceptable while checking these answers, after the plan was frozen, and the frozen preferences still list "unusual requirements" under `experience_inflation`. Raw itself is only 20/30, mostly `wrong_fit`, so the agent model is a bigger source of error than the trimming.
-
 ## Savings
 
 Only on tasks both arms passed, so a cheap failure can't look like a saving.

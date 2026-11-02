@@ -125,3 +125,11 @@ def test_eval_unknown_task_id_exits_1(api_dir, monkeypatch):
     monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
     assert cli.main(["eval", str(api_dir), "--tasks", "zzz"]) == 1
     assert not (api_dir / "runs" / "results.jsonl").exists()
+
+
+def test_save_rows_drops_tasks_no_longer_listed(tmp_path):
+    p = tmp_path / "results.jsonl"
+    r = lambda t, v: {"arm": "raw", "model": "m", "task": t, "v": v}
+    cli._save_rows(p, [r("a", 1), r("b", 1)], {"a", "b"})
+    cli._save_rows(p, [r("a", 2)], {"a"})
+    assert [json.loads(l) for l in p.read_text().splitlines()] == [r("a", 2)]

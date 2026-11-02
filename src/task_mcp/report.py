@@ -95,7 +95,7 @@ def break_even(rows, stats, agent="agent"):
         return "never (no saving)" if save <= 0 else f"{cost / save:.1f}"
     s_ex, s_save = stats.get("seconds", 0) / n, saved("seconds")
     ext = stats.get("extract_model", "extractor")
-    if "tokens_in" not in stats:
+    if not stats.get("tokens_in"):
         return (f"- Extraction per posting: tokens not measured, {s_ex:.0f} s. Saved per query: "
                 f"{saved('tokens_in'):.0f} tokens ({agent}), {s_save:.1f} s. Break-even: tokens not measured, "
                 f"{after(s_ex, s_save)} queries by seconds.")

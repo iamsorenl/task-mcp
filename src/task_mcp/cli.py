@@ -104,11 +104,11 @@ def cmd_precompute(a):
     return 0
 
 
-def _save_rows(path, rows):
+def _save_rows(path, rows, task_ids):
     key = lambda r: (r["arm"], r["model"], r["task"])
     done = {key(r) for r in rows}
     keep = [json.loads(l) for l in path.read_text().splitlines()] if path.exists() else []
-    keep = [r for r in keep if key(r) not in done]
+    keep = [r for r in keep if key(r) not in done and r["task"] in task_ids]
     path.write_text("".join(json.dumps(r) + "\n" for r in keep + rows))
 
 
@@ -119,6 +119,7 @@ def cmd_eval(a):
         return 1
     tasks_doc, rb = yaml.safe_load((d / "tasks.yaml").read_text()), ReplayBackend(rec)
     tasks = [t for t in tasks_doc["tasks"] if t.get("checked") or not a.only_checked]
+    task_ids = {t["id"] for t in tasks}
     if a.tasks:
         want = a.tasks.split(",")
         if unknown := sorted(set(want) - {t["id"] for t in tasks}):
@@ -140,7 +141,7 @@ def cmd_eval(a):
                          "seconds": out["seconds"], "final": out["final"], "stopped": out["stopped"]})
             print(f"{arm} {t['id']}: {g['label']} ({out['tokens_in']} tokens in)", flush=True)
     (d / "runs").mkdir(exist_ok=True)
-    _save_rows(d / "runs" / "results.jsonl", rows)
+    _save_rows(d / "runs" / "results.jsonl", rows, task_ids)
     return 0
 
 

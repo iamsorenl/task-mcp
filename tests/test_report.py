@@ -86,3 +86,7 @@ def test_report_tolerates_rows_without_extra_flags():  # Review Focus 4: M1 rows
 def test_extra_flags_column_counts_rows():
     rows = [dict(row("lean", "t1", True, 250), extra_flags=["location"]), row("raw", "t1", True, 1000)]
     assert "| lean | 1/1 |" in render(rows, {}, META)
+
+
+def test_break_even_zero_extraction_tokens_is_not_measured():
+    assert "not measured" in break_even(ROWS, {"extracted": 10, "seconds": 400.0, "tokens_in": 0, "tokens_out": 0})
