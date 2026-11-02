@@ -85,6 +85,12 @@ Savings are reported second: median tokens in on tasks both arms passed, as in M
   long hours, 996.
 - **Not a flag:** "fast-paced" on its own, a normal on-call rotation.
 
+Refined by Soren while checking the held-out answers (2026-11-02), after the plan was frozen:
+"mornings, nights, and unexpected calls" is long hours; late evenings during escalations are
+expected (not a flag); a values line like "We value intensity, pace, curiosity" is not long hours.
+The frozen plan was not changed. Both affected postings fail fit on years or seniority anyway,
+so an over-flag there shows only in the extra-flags column.
+
 This rule drives the hint regexes, the hours_996 description, and the drafted expected answers.
 
 ## Held-out set

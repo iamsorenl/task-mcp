@@ -1,0 +1,295 @@
+preferences: 'About me: early-to-mid career software engineer, about 3 years of experience. A role is a fit only if all hold:
+  it can be done from a Bay Area office (San Francisco, Peninsula or San Jose; onsite up to 5 days a week is fine); it is
+  not Senior, Staff, Principal, lead or manager level; it asks for 4 years of experience or less; it does not expect 996,
+  regular extended hours, weekend work or a ''high-intensity'' pace (''fast-paced'' alone and a normal on-call rotation are fine). Remote-only roles are not a fit. Red flag types: seniority
+  (senior/staff/lead/manager level), experience_inflation (5+ years asked for a title that isn''t senior, or unusual requirements),
+  hours_996 (996, weekends, extended hours, high-intensity), location (no Bay Area office option), pay (no pay range or low
+  pay), other.'
+tasks:
+- id: xai-5111374007
+  q: 'Look at job 5111374007 on the "xai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - seniority
+    - hours_996
+  why: Palo Alto; 'Sr. Software Engineer' title; 'thrives in high-intensity environments'; no years asked; $180-440k
+  checked: true
+- id: verkada-5275159007
+  q: 'Look at job 5275159007 on the "verkada" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - hours_996
+    - pay
+  why: "'mornings, nights, and unexpected calls/messages may be required' (Soren: long hours); $90-110k OTE is low pay (Soren). San Mateo 5 days on-site is fine"
+  checked: true
+- id: samsara-8113356
+  q: 'Look at job 8113356 on the "samsara" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: "'8+ years of relevant experience' for a non-senior title; 'We value intensity, pace, and curiosity' is not long hours (Soren); SF; $146-246k"
+  checked: true
+- id: samsara-8204369
+  q: 'Look at job 8204369 on the "samsara" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - seniority
+  why: "'Senior' title, '5+ years of experience in Security Incident Response'; 'late evenings' during escalations is expected, not a flag (Soren); SF; $135-228k"
+  checked: true
+- id: robinhood-8258305
+  q: 'Look at job 8258305 on the "robinhood" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: Menlo Park, in-person 3 days/wk; '2+ years of experience in software development'; $130-195k tiers; 'closed nights
+    and weekends' describes markets, not hours
+  checked: true
+- id: robinhood-8255840
+  q: 'Look at job 8255840 on the "robinhood" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - seniority
+  why: '''Senior Software Engineer'' title, ''5+ years of experience in software development''; Menlo Park hybrid 3 days'
+  checked: true
+- id: asana-7962412
+  q: 'Look at job 7962412 on the "asana" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF office hybrid (Mon/Tue/Thu); '2+ years'; $171-190k; 'standard team on-call rotations' is benign
+  checked: true
+- id: anthropic-5450099008
+  q: 'Look at job 5450099008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: SF; '5+ years of experience as a Data Engineer' for a non-senior title; $320-405k
+  checked: true
+- id: figma-6233043004
+  q: 'Look at job 6233043004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: SF hub offered; '5+ years of software engineering experience' for a non-senior title; $153-296k
+  checked: true
+- id: scaleai-4665557005
+  q: 'Look at job 4665557005 on the "scaleai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF; '4+ years of full-time engineering experience' (at limit); 'fast-paced' alone is fine; $179-224k
+  checked: true
+- id: anthropic-5364804008
+  q: 'Look at job 5364804008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF office 25% hybrid; no years asked ('correlate with the internal job level'); $350-500k; 'data-intensive' is technical
+  checked: true
+- id: anthropic-5437172008
+  q: 'Look at job 5437172008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF 25% hybrid; '4+ years as a Software Engineer, Forward Deployed Engineer, or technical founder' (at limit); $280-320k
+  checked: true
+- id: anthropic-5057647008
+  q: 'Look at job 5057647008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF/NYC, 'requires 3 days in office per week'; '4+ years' (at limit); $200-320k
+  checked: true
+- id: vercel-6201179004
+  q: 'Look at job 6201179004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: "'4+ years as a solutions engineer' plus 'You have 6+ years of experience building and launching frontend applications' makes it a no (Soren). Hybrid SF, $176-225k"
+  checked: true
+- id: vercel-6225825004
+  q: 'Look at job 6225825004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: Hybrid SF anchor days Mon/Tue/Fri; 'Have 4+ years of full-stack development experience' (at limit); $180-295k
+  checked: true
+- id: scaleai-4513943005
+  q: 'Look at job 4513943005 on the "scaleai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF office option; '4+ years of full-time engineering experience' (at limit); $179-224k
+  checked: true
+- id: scaleai-4720573005
+  q: 'Look at job 4720573005 on the "scaleai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF; '4+ years of software engineering, machine learning, or applied AI experience' (at limit); $180-225k
+  checked: true
+- id: anthropic-4982193008
+  q: 'Look at job 4982193008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: "'3+ years of software engineering experience ... and/or 5+ years of detection engineering' makes it a no (Soren). SF 25% hybrid; 'on-call rotation' is benign; $300-405k"
+  checked: true
+- id: figma-5551686004
+  q: 'Look at job 5551686004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: SF hub offered; '5+ years of backend or infrastructure engineering experience' for a non-senior title; $153-376k
+  checked: true
+- id: anthropic-5462972008
+  q: 'Look at job 5462972008 on the "anthropic" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: "SF-based, no years stated; drone, counter-UAS and FAA Part 107 are preferred, not required, so fine (Soren). $320-405k"
+  checked: true
+- id: vercel-5798406004
+  q: 'Look at job 5798406004 on the "vercel" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: Hybrid SF; '5+ years of relevant experience' for a non-senior title ('Software Engineer'); $196-294k
+  checked: true
+- id: discord-8846732002
+  q: 'Look at job 8846732002 on the "discord" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF Bay Area; '3+ years of software engineering experience'; 'Lead complex initiatives' is a project duty, title is
+    not lead; $160-200k
+  checked: true
+- id: discord-8642213002
+  q: 'Look at job 8642213002 on the "discord" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF Bay Area; '2+ years of professional software engineering experience'; $160-200k
+  checked: true
+- id: robinhood-7263592
+  q: 'Look at job 7263592 on the "robinhood" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: Menlo Park, in-person 3 days/wk; '2+ years of experience in software development'; $130-195k tiers
+  checked: true
+- id: robinhood-8008723
+  q: 'Look at job 8008723 on the "robinhood" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: Menlo Park option (also Bellevue/NYC); 'At least 3 years of professional development experience'; $130-195k tiers
+  checked: true
+- id: robinhood-7794027
+  q: 'Look at job 7794027 on the "robinhood" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: Menlo Park, in-person 3 days/wk; 'You have 3+ years of professional iOS engineering experience'; $130-195k tiers
+  checked: true
+- id: scaleai-4722512005
+  q: 'Look at job 4722512005 on the "scaleai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF; '3+ years of full-time software engineering experience'; 'moves fast'/'shipping fast' are pace words but not high-intensity;
+    $180-225k
+  checked: true
+- id: scaleai-4673771005
+  q: 'Look at job 4673771005 on the "scaleai" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no",
+    "red_flags": [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''],
+    "quote": exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: "SF office 3-4 days, no years asked; a secret clearance is obtainable, not a flag (Soren); $184-259k"
+  checked: true
+- id: asana-8194522
+  q: 'Look at job 8194522 on the "asana" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'yes'
+    red_flags: []
+  why: SF office hybrid (Mon/Tue/Thu); '2+ years of experience working within large, well-maintained codebases'; $171-190k
+  checked: true
+- id: figma-6201407004
+  q: 'Look at job 6201407004 on the "figma" job board. Is it a fit for me? Reply with only JSON: {"fit": "yes" or "no", "red_flags":
+    [{"type": one of [''seniority'', ''experience_inflation'', ''hours_996'', ''location'', ''pay'', ''other''], "quote":
+    exact words from the posting}]}'
+  expected:
+    fit: 'no'
+    red_flags:
+    - experience_inflation
+  why: SF hub offered; '5+ years of experience building and operating production data platforms' for a non-senior title; $153-376k
+  checked: true
