@@ -43,3 +43,13 @@ def test_no_expected_flags_is_full_recall():
 
 def test_flags_as_plain_strings_count():
     assert grade(T, out('{"fit": "no", "red_flags": ["hours_996"]}'))["pass"]
+
+
+def test_grade_reports_extra_flags_without_failing():
+    t = {"expected": {"fit": "no", "red_flags": ["seniority"]}}
+    g = grade(t, out('{"fit":"no","red_flags":[{"type":"seniority"},{"type":"location"}]}'))
+    assert g["pass"] and g["extra_flags"] == ["location"]
+
+
+def test_grade_extra_flags_empty_on_bad_json():
+    assert grade(T, out("nope"))["extra_flags"] == []

@@ -18,7 +18,7 @@ def _flag_types(answer):
 def grade(task, out):
     exp = task["expected"]
     want = set(exp.get("red_flags") or [])
-    result = {"pass": False, "fit_ok": False, "flag_recall": 0.0, "label": "stopped"}
+    result = {"pass": False, "fit_ok": False, "flag_recall": 0.0, "label": "stopped", "extra_flags": []}
     if out.get("stopped") and not out.get("final"):
         return result
     answer = parse_answer(out.get("final"))
@@ -27,4 +27,5 @@ def grade(task, out):
     fit_ok = str(answer["fit"]).strip().lower() == str(exp["fit"]).strip().lower()
     recall = len(want & _flag_types(answer)) / len(want) if want else 1.0
     label = "wrong_fit" if not fit_ok else "missed_flag" if recall < 1.0 else "pass"
-    return {"pass": label == "pass", "fit_ok": fit_ok, "flag_recall": round(recall, 3), "label": label}
+    return {"pass": label == "pass", "fit_ok": fit_ok, "flag_recall": round(recall, 3), "label": label,
+            "extra_flags": sorted(map(str, _flag_types(answer) - want))}

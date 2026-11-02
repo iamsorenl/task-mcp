@@ -106,6 +106,12 @@ def test_report_mixed_models_needs_model_flag(api_dir, monkeypatch):
     assert "`m2`" in (api_dir / "REPORT.md").read_text()
 
 
+def test_precompute_records_extract_model(api_dir, monkeypatch):
+    monkeypatch.setattr(cli, "COMPLETE_FACTORY", lambda provider, model, json_mode=False: (lambda p: GOOD))
+    assert cli.main(["precompute", str(api_dir), "--extract-model", "x:1b"]) == 0
+    assert json.loads((api_dir / "runs" / "precompute.json").read_text())["extract_model"] == "x:1b"
+
+
 def test_eval_task_subset_keeps_other_rows(api_dir, monkeypatch):
     monkeypatch.setattr(cli, "CHAT_FACTORY", fake_chat_factory)
     monkeypatch.setattr(cli, "COMPLETE_FACTORY", lambda provider, model, json_mode=False: (lambda p: GOOD))

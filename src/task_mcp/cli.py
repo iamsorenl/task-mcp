@@ -97,7 +97,7 @@ def cmd_precompute(a):
     plan = _valid_plan(d, src, rec)
     if plan is None:
         return 1
-    stats = precompute(plan, src, ReplayBackend(rec), _extractor(d, plan, a))
+    stats = {**precompute(plan, src, ReplayBackend(rec), _extractor(d, plan, a)), "extract_model": a.extract_model}
     (d / "runs").mkdir(exist_ok=True)
     (d / "runs" / "precompute.json").write_text(json.dumps(stats, indent=1))
     print(json.dumps(stats))
