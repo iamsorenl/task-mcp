@@ -1,0 +1,57 @@
+api: greenhouse
+task: "Screen job postings for fit against my preferences."
+sources: sources.yaml
+tools:
+  - name: search_jobs
+    description: "Search one company's job board. Returns short rows (id, title, location, department, url). Use get_job for details."
+    endpoint: list_jobs
+    params:
+      board: {type: string, required: true, description: "Greenhouse board token, e.g. anthropic"}
+      query: {type: string, filter: title, description: "Words in the job title"}
+      location: {type: string, filter: location.name, description: "Words in the location, e.g. San Francisco"}
+    fields:
+      id: keep
+      title: keep
+      location.name: keep
+      departments[*].name: keep
+      absolute_url: keep
+    reasons:
+      content: "Full HTML description, about 3k tokens per job. Fetched per job by get_job."
+      offices: "Duplicates location.name."
+      metadata: "Location type is shown by get_job."
+      data_compliance: "Legal boilerplate."
+  - name: get_job
+    description: "One job's facts: title, location, onsite type, and a structured summary of the description (scope, day to day, experience asked, red flags with quotes, pay, onsite terms)."
+    endpoint: get_job
+    params:
+      board: {type: string, required: true, description: "Greenhouse board token"}
+      id: {type: string, required: true, description: "Job id from search_jobs"}
+    fields:
+      title: keep
+      location.name: keep
+      metadata[*].name: keep
+      metadata[*].value: keep
+      absolute_url: keep
+      content: {extract: description_facts}
+    reasons:
+      content: "Extracted; benefits, company blurb, EEO text and how-to-apply are dropped."
+      offices: "Duplicates location.name."
+      data_compliance: "Legal boilerplate."
+      internal_job_id: "Internal id, not useful to the task."
+extracts:
+  description_facts:
+    html: true
+    instructions: >
+      Summarize this job description for someone screening roles. Only use facts stated in the text.
+      Use null or an empty list when the text doesn't say. Quotes must be copied exactly from the text.
+    schema:
+      scope: {type: string, description: "What the role owns, one or two sentences"}
+      day_to_day: {type: list, description: "What the time goes to, short items"}
+      experience: {type: list, quote: true, description: "Years and seniority asked for, verbatim seniority words"}
+      red_flags:
+        type: list
+        quote: true
+        enum: [seniority, experience_inflation, hours_996, location, pay, other]
+        description: "Senior/Staff level, inflated requirements, 996 or long hours, location limits, missing or low pay, anything else off"
+      pay_range: {type: string, description: "Pay range as written"}
+      onsite: {type: string, description: "Onsite/hybrid/remote terms including days per week"}

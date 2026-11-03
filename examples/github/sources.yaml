@@ -1,0 +1,9 @@
+name: github
+base: https://api.github.com
+endpoints:
+  - id: list_issues
+    path: /repos/{owner}/{repo}/issues
+    query: {state: all, per_page: "30"}
+    items: "[*]"
+    item_id: number
+seeds: {owner: [facebook], repo: [react]}

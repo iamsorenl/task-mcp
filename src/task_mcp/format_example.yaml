@@ -1,0 +1,39 @@
+# A made-up bookshop API, only to show the plan format. Not a real API.
+api: bookshop
+task: "Recommend books a reader would like."
+sources: sources.yaml
+tools:
+  - name: search_books
+    description: "Search the catalog. Returns short rows. Use get_book for details."
+    endpoint: list_books
+    params:
+      shop: {type: string, required: true, description: "Shop id"}
+      query: {type: string, filter: title, description: "Words in the title"}
+    fields:
+      id: keep
+      title: keep
+      author.name: keep
+    reasons:
+      blurb: "Long marketing text, summarized by get_book."
+      inventory: "Stock counts the task doesn't use."
+  - name: get_book
+    description: "One book's facts and a short structured summary of its blurb."
+    endpoint: get_book
+    params:
+      shop: {type: string, required: true}
+      id: {type: string, required: true, description: "Book id from search_books"}
+    fields:
+      title: keep
+      author.name: keep
+      genres[*].name: keep
+      blurb: {extract: blurb_facts}
+    reasons:
+      inventory: "Stock counts the task doesn't use."
+extracts:
+  blurb_facts:
+    html: true
+    instructions: "Summarize this book blurb for someone choosing what to read. Only use facts in the text."
+    schema:
+      premise: {type: string, description: "One sentence"}
+      themes: {type: list}
+      warnings: {type: list, quote: true, enum: [violence, other], description: "Content warnings, quoted"}

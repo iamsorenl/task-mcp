@@ -1,0 +1,28 @@
+api: github
+task: "Triage a repo's recent issues: what each one is about and whether it needs a maintainer."
+sources: sources.yaml
+tools:
+  - name: list_issues
+    description: "Recent issues for one repo: number, title, state, labels, author, and a short summary of the body."
+    endpoint: list_issues
+    params:
+      owner: {type: string, required: true}
+      repo: {type: string, required: true}
+      query: {type: string, filter: title, description: "Words in the issue title"}
+    fields:
+      number: keep
+      title: keep
+      state: keep
+      labels[*].name: keep
+      user.login: keep
+      body: {extract: issue_facts}
+    reasons:
+      reactions: "Counts the task doesn't use."
+      user: "Only the login is useful."
+extracts:
+  issue_facts:
+    html: false
+    instructions: "Summarize this GitHub issue body. Only use facts stated in the text."
+    schema:
+      summary: {type: string}
+      asks: {type: list, quote: true, description: "What the author asks for, quoted"}
