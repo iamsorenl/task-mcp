@@ -1,3 +1,4 @@
+import re
 import copy
 import json
 
@@ -169,3 +170,11 @@ def test_prompt_lists_hinted_sentences_only_when_matched():
     assert 'Sentences that may be hours_996 items for "red_flags"' in p
     assert "- Thrive in high-intensity environments." in p
     assert "Sentences that may be" not in _prompt(ex, "Plain posting.")
+
+
+def test_hint_sentences_stops_scanning_at_cap(monkeypatch):
+    import task_mcp.extract as ex
+    seen, real = [], re.search
+    monkeypatch.setattr(ex.re, "search", lambda p, s, f=0: seen.append(s) or real(p, s, f))
+    hint_sentences("\n".join(f"evening {i}." for i in range(50)), [r"evening"], cap=3)
+    assert len(seen) == 3

@@ -17,9 +17,12 @@ raw: the API as is, one tool per endpoint. shaped: the plan's task-shaped tools,
 Lean failed 2 of the 18 tasks raw passed. These are the mistakes the trimming caused.
 
 - anthropic-5238637008: raw pass, lean wrong_fit. lean: `{"fit":"no","red_flags":[{"type":"experience_inflation","quote":"Minimum years of experience: Years of experience required will correlate with the internal job level requirements for the position"},{"type":"pay","quote":"$300,000–$320,000 USD"}]}`
+  - extract: experience_inflation "Minimum years of experience: Years of experience required will correlate with the internal job level requirements for the position"
+  - lean repeated the extract's flag
 - figma-5551697004: raw pass, lean bad_json. lean: `{"fit":"no","red_flags":[{"type":"location","quote":"London, England"},{"type":"pay","quote":"pay_range": null}]}`
+  - extract: nothing labeled
 
-Both failed: anthropic-5454673008
+Both failed: anthropic-5454673008 (from extract)
 Lean only: anthropic-5098025008
 
 ## Savings

@@ -4,6 +4,7 @@ import statistics
 from collections import Counter
 
 from .arms import ARMS
+from .extract import first_json, normalize
 
 LABELS = ("pass", "wrong_fit", "missed_flag", "bad_json", "stopped")
 
@@ -64,17 +65,40 @@ def caused_mistakes(rows):
             for t in sorted(raw.keys() & lean.keys()) if raw[t]["pass"] and not lean[t]["pass"]]
 
 
-def reliability(rows):
+def _quoted(obj):
+    """(type, quote) pairs from every list of {"type", "quote"} items in obj."""
+    return [(i.get("type"), i["quote"]) for v in (obj or {}).values() if isinstance(v, list)
+            for i in v if isinstance(i, dict) and "type" in i and isinstance(i.get("quote"), str)]
+
+
+def _from_extract(final, extract):
+    """True if the answer repeats a quote the extract had already labeled."""
+    try:
+        answer = first_json(final)
+    except ValueError:
+        return False
+    labeled = {normalize(q) for _, q in _quoted(extract)}
+    return any(normalize(q) in labeled for _, q in _quoted(answer if isinstance(answer, dict) else {}))
+
+
+def reliability(rows, extracts=None):
     raw, lean = _by_task(rows, "raw"), _by_task(rows, "lean")
     common = sorted(raw.keys() & lean.keys())
     if not common:
         return "No tasks ran in both raw and lean."
+    extracts = extracts or {}
     caused = caused_mistakes(rows)
     raw_passed = sum(raw[t]["pass"] for t in common)
     lines = [f"Lean failed {len(caused)} of the {raw_passed} tasks raw passed. These are the mistakes the trimming caused.", ""]
     for c in caused:
         lines += [f"- {c['task']}: raw {c['raw_label']}, lean {c['lean_label']}. lean: `{c['lean_final'][:400]}`"]
-    both = [t for t in common if not raw[t]["pass"] and not lean[t]["pass"]]
+        if c["task"] in extracts:
+            got = "; ".join(f'{k} "{q}"' for k, q in _quoted(extracts[c["task"]])) or "nothing labeled"
+            lines += [f"  - extract: {got}"]
+            if _from_extract(c["lean_final"], extracts[c["task"]]):
+                lines += ["  - lean repeated the extract's flag"]
+    both = [t + (" (from extract)" if t in extracts and _from_extract(lean[t]["final"], extracts[t]) else "")
+            for t in common if not raw[t]["pass"] and not lean[t]["pass"]]
     wins = [t for t in common if lean[t]["pass"] and not raw[t]["pass"]]
     lines += ["", f"Both failed: {', '.join(both) or 'none'}", f"Lean only: {', '.join(wins) or 'none'}"]
     return "\n".join(lines)
@@ -118,7 +142,7 @@ def disagreements(rows, n=5):
     return "\n".join(out) or "None."
 
 
-def render(rows, precompute_stats, meta):
+def render(rows, precompute_stats, meta, extracts=None):
     s = precompute_stats or {}
     parts = [f"# Results: {meta.get('api', '')}", "",
              f"Agent model `{meta.get('model')}`, run {meta.get('date')}. Token counts are Ollama's own "
@@ -128,7 +152,7 @@ def render(rows, precompute_stats, meta):
              "raw: the API as is, one tool per endpoint. shaped: the plan's task-shaped tools, every field kept. "
              "lean: shaped plus the plan's drops and extracts. Extra flags: rows whose answer named a flag type "
              "the reference didn't (not failed unless it changed the fit verdict).", "", arm_table(rows), "",
-             "## Reliability", "", reliability(rows), "",
+             "## Reliability", "", reliability(rows, extracts), "",
              "## Savings", "", "Only on tasks both arms passed, so a cheap failure can't look like a saving.", "",
              *[savings(rows, a, b) for a, b in (("lean", "raw"), ("shaped", "raw"), ("lean", "shaped"))], ""]
     parts += ["## Break-even", "", "One-time extraction cost per posting against tokens and seconds saved per agent "

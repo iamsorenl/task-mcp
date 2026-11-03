@@ -56,3 +56,14 @@ def test_built_server_calls_runtime(tmp_path, monkeypatch):
 def test_built_server_extractor_turns_thinking_off(tmp_path):
     src = build("examples/greenhouse/plan.yaml", tmp_path).read_text()
     assert "think=False" in src and "max_out=" in src
+
+
+def test_built_server_refuses_plan_edited_into_invalid(tmp_path):
+    import pytest
+    import yaml
+    build("examples/greenhouse/plan.yaml", tmp_path)
+    plan = yaml.safe_load((tmp_path / "plan.yaml").read_text())
+    plan["extracts"]["description_facts"]["schema"]["red_flags"]["hints"]["hours_996"] = ["("]
+    (tmp_path / "plan.yaml").write_text(yaml.safe_dump(plan))
+    with pytest.raises(ValueError, match="bad regex"):
+        import_from(tmp_path / "server.py")

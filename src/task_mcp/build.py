@@ -17,7 +17,7 @@ from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from task_mcp.extract import Extractor
-from task_mcp.plan import load_plan
+from task_mcp.plan import load_plan, validate
 from task_mcp.providers import ollama_complete
 from task_mcp.runtime import call_tool
 from task_mcp.sources import LiveBackend, load_sources
@@ -25,6 +25,8 @@ from task_mcp.sources import LiveBackend, load_sources
 HERE = Path(__file__).parent
 PLAN = load_plan(HERE / "plan.yaml")
 SRC = load_sources(PLAN["sources_path"])
+if ERRS := validate(PLAN, SRC):  # plan.yaml may have been edited after build
+    raise ValueError("plan.yaml is invalid: " + "; ".join(ERRS))
 EXTRACTOR = Extractor(PLAN, ollama_complete(os.environ.get("TASK_MCP_EXTRACT_MODEL", "gemma4:12b"), num_ctx=16384,
                                        json_mode=True, think=False, max_out=1500),
                       HERE / "cache")

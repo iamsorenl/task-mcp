@@ -133,3 +133,13 @@ def test_save_rows_drops_tasks_no_longer_listed(tmp_path):
     cli._save_rows(p, [r("a", 1), r("b", 1)], {"a", "b"})
     cli._save_rows(p, [r("a", 2)], {"a"})
     assert [json.loads(l) for l in p.read_text().splitlines()] == [r("a", 2)]
+
+
+def test_latest_extracts_picks_newest_cache_file_per_task(tmp_path):
+    import os
+    c = tmp_path / "cache" / "facts"
+    c.mkdir(parents=True)
+    (c / "123-old.json").write_text('{"v": "old"}')
+    (c / "123-new.json").write_text('{"v": "new"}')
+    os.utime(c / "123-old.json", (1, 1))
+    assert cli._latest_extracts(tmp_path, ["board-123", "board-999"]) == {"board-123": {"v": "new"}}

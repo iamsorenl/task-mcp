@@ -145,6 +145,16 @@ def cmd_eval(a):
     return 0
 
 
+def _latest_extracts(d, task_ids):
+    """task id -> newest cached extract for its item (the id after the last '-'), for the report's Reliability notes."""
+    out = {}
+    for t in task_ids:
+        files = sorted(Path(d, "cache").glob(f"*/{t.rsplit('-', 1)[-1]}-*.json"), key=lambda f: f.stat().st_mtime)
+        if files:
+            out[t] = json.loads(files[-1].read_text())
+    return out
+
+
 def cmd_report(a):
     d = Path(a.dir)
     rows = [json.loads(l) for l in (d / "runs" / "results.jsonl").read_text().splitlines()]
@@ -160,7 +170,8 @@ def cmd_report(a):
         print(f"no results for model {a.model}", file=sys.stderr)
         return 1
     meta = {"api": d.name, "model": a.model or models[0], "date": datetime.date.today().isoformat()}
-    (d / "REPORT.md").write_text(render(rows, stats, meta))
+    extracts = _latest_extracts(d, sorted({r["task"] for r in rows}))
+    (d / "REPORT.md").write_text(render(rows, stats, meta, extracts))
     print(f"wrote {d / 'REPORT.md'}")
     return 0
 

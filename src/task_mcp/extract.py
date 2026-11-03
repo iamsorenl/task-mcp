@@ -32,7 +32,9 @@ def hint_sentences(text, patterns, cap=8):
         s = s.strip()[:300]
         if s and s not in out and any(re.search(p, s, re.I) for p in patterns):
             out.append(s)
-    return out[:cap]
+            if len(out) == cap:
+                break
+    return out
 
 
 def _prompt(ex, text, error=None):

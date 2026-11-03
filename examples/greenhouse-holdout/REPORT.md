@@ -17,9 +17,13 @@ raw: the API as is, one tool per endpoint. shaped: the plan's task-shaped tools,
 Lean failed 2 of the 20 tasks raw passed. These are the mistakes the trimming caused.
 
 - anthropic-5364804008: raw pass, lean wrong_fit. lean: `{"fit":"no","red_flags":[{"type":"seniority","quote":"Minimum years of experience: Years of experience required will correlate with the internal job level requirements for the position"},{"type":"experience_inflation","quote":"Minimum years of experience: Years of experience required will correlate with the internal job level requirements for the position"}]}`
+  - extract: experience_inflation "Minimum years of experience: Years of experience required will correlate with the internal job level requirements for the position"
+  - lean repeated the extract's flag
 - scaleai-4673771005: raw pass, lean wrong_fit. lean: `{"fit":"no","red_flags":[{"type":"experience_inflation","quote":"At least an active secret clearance and the ability & willingness to up level to TS/SCI with CI Poly."}]}`
+  - extract: experience_inflation "At least an active secret clearance and the ability & willingness to up level to TS/SCI with CI Poly."
+  - lean repeated the extract's flag
 
-Both failed: anthropic-5057647008, anthropic-5437172008, anthropic-5462972008, scaleai-4513943005, scaleai-4665557005, scaleai-4720573005, vercel-6225825004, verkada-5275159007
+Both failed: anthropic-5057647008 (from extract), anthropic-5437172008 (from extract), anthropic-5462972008 (from extract), scaleai-4513943005, scaleai-4665557005 (from extract), scaleai-4720573005, vercel-6225825004, verkada-5275159007 (from extract)
 Lean only: anthropic-5450099008, xai-5111374007
 
 ## Savings

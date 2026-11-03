@@ -90,3 +90,31 @@ def test_extra_flags_column_counts_rows():
 
 def test_break_even_zero_extraction_tokens_is_not_measured():
     assert "not measured" in break_even(ROWS, {"extracted": 10, "seconds": 400.0, "tokens_in": 0, "tokens_out": 0})
+
+
+EXTRACT = {"red_flags": [{"type": "experience_inflation", "quote": "Years will correlate with job level"}]}
+
+
+def test_reliability_shows_extract_and_marks_copied_flag():
+    lean_final = '{"fit":"no","red_flags":[{"type":"experience_inflation","quote":"years will correlate with job level"}]}'
+    rows = [row("raw", "t1", True, 1000), row("lean", "t1", False, 250, final=lean_final),
+            row("raw", "t2", False, 1000), row("lean", "t2", False, 250, final=lean_final),
+            row("raw", "t3", False, 1000), row("lean", "t3", False, 250, final="{}")]
+    md = render(rows, {}, META, extracts={"t1": EXTRACT, "t2": EXTRACT, "t3": EXTRACT})
+    assert 'extract: experience_inflation "Years will correlate with job level"' in md
+    assert "lean repeated the extract's flag" in md
+    assert "Both failed: t2 (from extract), t3" in md
+
+
+def test_reliability_without_extracts_unchanged():
+    rows = [row("raw", "t1", True, 1000), row("lean", "t1", False, 250)]
+    md = render(rows, {}, META)
+    assert "extract:" not in md
+
+
+def test_unlabeled_extract_quotes_are_not_flags():
+    facts = {"experience": [{"text": "3 years", "quote": "3+ years of experience"}], "red_flags": []}
+    final = '{"fit":"no","red_flags":[{"type":"experience_inflation","quote":"3+ years of experience"}]}'
+    rows = [row("raw", "t1", True, 1000), row("lean", "t1", False, 250, final=final)]
+    md = render(rows, {}, META, extracts={"t1": facts})
+    assert "extract: nothing labeled" in md and "repeated" not in md
